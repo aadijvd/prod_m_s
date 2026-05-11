@@ -71,8 +71,76 @@
                 data-id="{{ $product->id }}">
                 Add to Cart
             </button>
+
+            <!-- reviews -->
+            <div id="reviewSection">
+
+                <hr>
+                @auth
+                <h5 class="mt-4">Write a Review</h5>
+
+                <form id="reviewForm" action="{{ route('product.review', $product->id) }}" method="POST">
+                    @csrf
+
+                    <!-- STAR RATING -->
+                    <div class="mb-2">
+                        @for($i = 1; $i <= 5; $i++)
+                            <i class="fa-regular fa-star star" data-value="{{ $i }}"></i>
+                            @endfor
+                    </div>
+
+                    <input type="hidden" name="rating" id="ratingValue">
+
+                    <textarea name="comment" class="form-control mb-2"
+                        placeholder="Write your review..."></textarea>
+
+                    <button class="btn btn-success btn-sm">Submit Review</button>
+                </form>
+                @else
+                <div class="alert alert-info">
+                    Please <a href="{{ route('login') }}">login</a> to write a review.
+                </div>
+                @endauth
+                <hr>
+
+                <!-- REVIEWS LIST -->
+                @foreach($product->reviews as $review)
+
+                <div class="border p-2 mb-2 rounded">
+
+                    <strong>{{ $review->name }}</strong>
+
+                    @php
+                    $stars = $review->rating / 2;
+                    @endphp
+
+                    <div class="text-warning">
+                        @for($i = 1; $i <= 5; $i++)
+                            @if($stars>= $i)
+                            <i class="fa-solid fa-star"></i>
+                            @elseif($stars >= $i - 0.5)
+                            <i class="fa-solid fa-star-half-stroke"></i>
+                            @else
+                            <i class="fa-regular fa-star"></i>
+                            @endif
+                            @endfor
+                    </div>
+
+                    <small>{{ $review->comment }}</small>
+
+                </div>
+
+                @endforeach
+
+            </div>
+
+            <!-- TOAST -->
+            <div id="reviewToast" class="review-toast">
+                Review submitted successfully ⭐
+            </div>
         </div>
 
     </div>
 </div>
+
 @endsection

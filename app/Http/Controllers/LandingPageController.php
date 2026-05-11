@@ -5,13 +5,15 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Models\Product;
 use App\Models\ProductImage;
+use App\Models\Review;
 
 class LandingPageController extends Controller
 {
     //*************************************************    showing landing page
     public function index() {
         $products = Product::latest()->take(4)->get(); // 4 latest products
-        return view('welcome', compact('products'));
+        $reviews = Review::latest()->take(3)->get();   // for review section
+        return view('welcome', compact('products', 'reviews'));
     }
 
     // ************************************************ SHOW PRODUCTS PAGE

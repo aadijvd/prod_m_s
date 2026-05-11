@@ -13,7 +13,49 @@
 <div class="container py-5">
     <h2 class="mb-4 text-center">Our Products</h2>
 
-    <div class="row">
+    <!-- Search product -->
+    <div class="search-wrapper">
+        <input type="text"
+            id="productSearch"
+            placeholder="Search products..."
+            autocomplete="off">
+    </div>
+    
+    <!-- FILTER DROPDOWN -->
+    <div class="filter-wrapper">
+        <select id="productFilter">
+            <option value="">Sort Products</option>
+            <option value="az">A - Z</option>
+            <option value="za">Z - A</option>
+            <option value="low_high">Price Low → High</option>
+            <option value="high_low">Price High → Low</option>
+        </select>
+    </div>
+
+    <!-- SKELETON LOADER -->
+    <div id="productSkeleton" class="row" style="display:none;">
+
+        @for($i = 0; $i < 8; $i++)
+            <div class="col-md-3 mb-4">
+            <div class="skeleton-card">
+                <div class="skeleton-img"></div>
+                <div class="skeleton-line w-80"></div>
+                <div class="skeleton-line w-50"></div>
+            </div>
+    </div>
+    @endfor
+
+</div>
+
+<!-- PRODUCTS LOAD HERE -->
+<div id="productContainer" class="row">
+    @include('partials.product-grid', ['products' => $products])
+</div>
+
+{{ $products->links('pagination::bootstrap-5') }}
+
+<!-- all products -->
+<!-- <div class="row">
 
         @foreach($products as $product)
         <div class="col-md-3 mb-4">
@@ -41,10 +83,10 @@
             </div>
         </div>
         @endforeach
-    </div>
+    </div> -->
 
-    <!-- forces Laravel to use that exact view which we edited like mentioned in controller -->
-    {{ $products->links('pagination::bootstrap-5') }}
+<!-- forces Laravel to use that exact view which we edited like mentioned in controller -->
+
 
 
 </div>

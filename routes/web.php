@@ -25,6 +25,13 @@ Route::get('/products', [LandingPageController::class, 'showProducts'])->name('p
 Route::view('/about', 'about')->name('about');
 Route::view('/contact', 'contact')->name('contact');
 
+// Products filter and search separately
+Route::get('/products/filter', [ProductController::class, 'filter'])->name('products.filter');
+Route::get('/products/search', [ProductController::class, 'search'])->name('products.search');
+// reviews
+Route::post('/product/{id}/review', [ProductController::class, 'storeReview'])
+    ->middleware('auth')
+    ->name('product.review');
 
 // Cart Routes
 Route::get('/cart', [CartController::class, 'show']);

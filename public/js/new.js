@@ -9,8 +9,18 @@ document.addEventListener("DOMContentLoaded", function () {
     initCartUpdate();
     initCounters();
     initAutoHideAlert();
-
+    initProductFilter();
+    initLiveSearch();
+    initReviewSystem();
 });
+
+
+
+
+
+
+
+
 
 
 // ===============================
@@ -28,6 +38,16 @@ function initNavbarScroll() {
 
     });
 }
+
+
+
+
+
+
+
+
+
+
 
 
 // ===============================
@@ -54,6 +74,18 @@ function initBackToTop() {
 
     });
 }
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 // ===============================
@@ -83,6 +115,20 @@ function initHeroSlider() {
 }
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 // ===============================
 // 4. PRODUCT QUANTITY
 // ===============================
@@ -103,6 +149,24 @@ function initProductQty() {
         if (val > 1) input.value = val - 1;
     });
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 // ===============================
@@ -151,6 +215,27 @@ function initAddToCart() {
 
     });
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 // ===============================
@@ -209,6 +294,22 @@ function initCartUpdate() {
 }
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 // ===============================
 // 7. COUNTER ANIMATION
 // ===============================
@@ -261,6 +362,21 @@ function initCounters() {
 }
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 // ===================================
 // 8. AUTO DISAPPEAR ORDER SUCCESS MSG
 // ===================================
@@ -281,3 +397,291 @@ function initAutoHideAlert() {
 
     }, 3000);
 }
+
+
+
+
+
+
+
+
+
+
+// ===================================
+// 9. PRODUCTS FILTER
+// ===================================
+
+// function initProductFilter() {
+
+//     const filter = document.getElementById('productFilter');
+//     const container = document.getElementById('productContainer');
+
+//     if (!filter || !container) return;
+
+//     filter.addEventListener('change', function () {
+
+//         let sort = this.value;
+
+//         fetch(`/products/filter?sort=${sort}`)
+//             .then(res => res.text())
+//             .then(html => {
+//                 container.innerHTML = html;
+
+//                 // re-bind add-to-cart after reload
+//                 initAddToCart();
+//             });
+//     });
+// }
+
+// with animation
+/* ***
+While filtering:
+
+✔ Skeleton loading appears instantly
+✔ No blank white screen
+
+After response:
+
+✔ Products fade in smoothly
+✔ Clean modern transition
+✔ Feels like Amazon / Flipkart
+
+*****/
+function initProductFilter() {
+
+    const filter = document.getElementById('productFilter');
+    const container = document.getElementById('productContainer');
+    const skeleton = document.getElementById('productSkeleton');
+
+    if (!filter || !container) return;
+
+    filter.addEventListener('change', function () {
+
+        let sort = this.value;
+
+        // SHOW SKELETON
+        container.style.display = "none";
+        skeleton.style.display = "flex";
+
+        fetch(`/products/filter?sort=${sort}`)
+            .then(res => res.text())
+            .then(html => {
+
+                setTimeout(() => {
+
+                    skeleton.style.display = "none";
+                    container.innerHTML = html;
+
+                    // SHOW PRODUCTS WITH FADE-IN
+                    container.style.display = "flex";
+                    container.classList.add("fade-in");
+
+                    setTimeout(() => {
+                        container.classList.remove("fade-in");
+                    }, 400);
+
+                    initAddToCart();
+
+                }, 400); // fake delay for smooth UX
+
+            });
+    });
+}
+
+
+
+
+
+
+
+
+
+
+// ===================================
+// 10. PRODUCTS SEARCH
+// ===================================
+function initLiveSearch() {
+
+    const input = document.getElementById('productSearch');
+    const container = document.getElementById('productContainer');
+
+    if (!input || !container) return;
+
+    let timer;
+
+    input.addEventListener('input', function () {
+
+        clearTimeout(timer);
+
+        let query = this.value;
+
+        timer = setTimeout(() => {
+
+            fetch(`/products/search?q=${query}`)
+                .then(res => res.text())
+                .then(html => {
+
+                    container.innerHTML = html;
+
+                    // re-bind cart buttons after update
+                    initAddToCart();
+                });
+
+        }, 400); // debounce delay
+    });
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+// ===================================
+// 10. PRODUCTS REVIEWS
+// ===================================
+function initReviewSystem() {
+
+    const stars = document.querySelectorAll('.star');
+    const form = document.getElementById('reviewForm');
+    const ratingInput = document.getElementById('ratingValue');
+    const toast = document.getElementById('reviewToast');
+
+    if (!form || !stars.length || !ratingInput || !toast) return;
+
+    let selectedRating = 0;
+
+    // ===============================
+    // STAR RATING SYSTEM
+    // ===============================
+    stars.forEach(star => {
+
+        star.addEventListener('mouseover', () => {
+            highlight(star.dataset.value);
+        });
+
+        star.addEventListener('click', () => {
+            selectedRating = parseInt(star.dataset.value);
+            ratingInput.value = selectedRating * 2; // 1–10 system
+            setActive(selectedRating);
+        });
+
+        star.addEventListener('mouseout', () => {
+            setActive(selectedRating);
+        });
+
+    });
+
+    function highlight(value) {
+        stars.forEach(star => {
+            star.classList.toggle(
+                'hovered',
+                star.dataset.value <= value
+            );
+        });
+    }
+
+    function setActive(value) {
+        stars.forEach(star => {
+            star.classList.toggle(
+                'active',
+                star.dataset.value <= value
+            );
+        });
+    }
+
+    // ===============================
+    // PREVENT DOUBLE SUBMIT
+    // ===============================
+    let isSubmitting = false;
+
+    // ===============================
+    // AJAX FORM SUBMIT
+    // ===============================
+    form.addEventListener('submit', function (e) {
+        e.preventDefault();
+
+        if (isSubmitting) return;
+
+        if (!selectedRating) {
+            showToast("Please select a rating ⭐");
+            return;
+        }
+
+        isSubmitting = true;
+
+        const btn = form.querySelector('button[type="submit"]');
+        if (btn) btn.disabled = true;
+
+        fetch(this.action, {
+            method: "POST",
+            headers: {
+                "X-CSRF-TOKEN": window.Laravel.csrfToken,
+                "Accept": "application/json"
+            },
+            body: new FormData(this)
+        })
+        .then(async res => {
+
+            const data = await res.json();
+
+            if (!res.ok) {
+                throw data;
+            }
+
+            return data;
+        })
+        .then(data => {
+
+            if (data.success) {
+
+                showToast("Review submitted successfully ⭐");
+
+                form.reset();
+                selectedRating = 0;
+                setActive(0);
+            }
+
+        })
+        .catch(err => {
+
+            // Laravel validation or auth errors
+            if (err.message) {
+                showToast(err.message);
+            } else {
+                showToast("Something went wrong");
+            }
+
+        })
+        .finally(() => {
+
+            isSubmitting = false;
+            if (btn) btn.disabled = false;
+
+        });
+
+    });
+
+    // ===============================
+    // TOAST NOTIFICATION
+    // ===============================
+    function showToast(message) {
+
+        toast.innerText = message;
+        toast.classList.add('show');
+
+        setTimeout(() => {
+            toast.classList.remove('show');
+        }, 2500);
+    }
+}
+

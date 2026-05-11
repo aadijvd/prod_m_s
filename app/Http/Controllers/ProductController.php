@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Models\Product;
 use App\Models\ProductImage;
+use App\Models\Review;
 use Illuminate\Support\Facades\Storage;
 
 class ProductController extends Controller
@@ -216,5 +217,81 @@ class ProductController extends Controller
         $product->delete();
 
         return redirect('/admin/products')->with('success', 'Product deleted successfully');;
+    }
+
+    // ********************************************************** PRRODUCTS FILTERs
+    public function filter(Request $request)
+    {
+        $query = Product::query();
+
+        // FILTER LOGIC
+        if ($request->sort == 'az') {
+            $query->orderBy('item_name', 'asc');
+        }
+
+        if ($request->sort == 'za') {
+            $query->orderBy('item_name', 'desc');
+        }
+
+        if ($request->sort == 'low_high') {
+            $query->orderBy('sale', 'asc');
+        }
+
+        if ($request->sort == 'high_low') {
+            $query->orderBy('sale', 'desc');
+        }
+
+        $products = $query->get();
+
+        // return ONLY HTML for AJAX
+        return view('partials.product-grid', compact('products'));
+    }
+
+    // ********************************************************** PRRODUCTS SEARCH
+    public function search(Request $request)
+    {
+        $query = $request->q;
+
+        $products = Product::where('item_name', 'like', "%{$query}%")
+            ->get();
+
+        return view('partials.product-grid', compact('products'));
+    }
+
+    // ********************************************************** PRRODUCTS REVIEWS
+    public function storeReview(Request $request, $id)
+    {
+        // 1. BLOCK GUESTS
+        if (!auth()->check()) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Please login to submit a review.'
+            ], 401);
+        }
+
+        // 2. ONE REVIEW PER USER PER PRODUCT
+        $exists = Review::where('product_id', $id)
+            ->where('user_id', auth()->id())
+            ->exists();
+
+        if ($exists) {
+            return response()->json([
+                'success' => false,
+                'message' => 'You have already reviewed this product.'
+            ], 409);
+        }
+
+        // 3. SAVE REVIEW
+        Review::create([
+            'product_id' => $id,
+            'user_id' => auth()->id(),
+            'name' => auth()->user()->name,
+            'rating' => $request->rating,
+            'comment' => $request->comment
+        ]);
+
+        return response()->json([
+            'success' => true
+        ]);
     }
 }

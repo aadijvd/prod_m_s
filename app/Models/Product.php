@@ -18,8 +18,15 @@ class Product extends Model
         'image',
     ];
 
+    // multi images table
     public function images()
     {
         return $this->hasMany(ProductImage::class);
+    }
+
+    // reviews
+    public function reviews()
+    {
+        return $this->hasMany(Review::class);
     }
 }

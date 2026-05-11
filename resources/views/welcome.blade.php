@@ -118,7 +118,7 @@
                 <a href="{{ route('product.details', $product->id) }}" class="text-decoration-none text-dark">
                     <div class="card product-card shadow-sm">
                         <img src="{{ asset('storage/' . $product->image) }}" class="card-img-top product-img">
-                        <div class="card-body">
+                        <div class="card-body-home">
                             <h5>{{ $product->item_name }}</h5>
                             <p class="text-muted">$ {{ $product->sale }}</p>
                         </div>
@@ -129,6 +129,16 @@
                 </div>
             </div>
             @endforeach
+        </div>
+    </div>
+    <!-- btn -->
+    <div class="container">
+        <div class="row">
+            <div class="view-all-wrapper">
+                <a href="{{ route('products.visitor') }}" class="view-all-btn">
+                    View All Products →
+                </a>
+            </div>
         </div>
     </div>
 </section>
@@ -191,25 +201,47 @@
 
         <div class="row g-4">
 
+            @foreach($reviews as $review)
             <div class="col-md-4">
-                <div class="testimonial-card p-4">
-                    <img src="{{ asset('images/image1.jpg') }}" class="testi-img mb-3">
 
+                <div class="testimonial-card p-4">
+
+                    <img src="{{ asset('images/guest.png') }}"
+                         class="testi-img mb-3">
+
+                    <!-- ⭐ STARS -->
                     <div class="mb-2 text-warning">
-                        <i class="fa fa-star"></i>
-                        <i class="fa fa-star"></i>
-                        <i class="fa fa-star"></i>
-                        <i class="fa fa-star"></i>
-                        <i class="fa fa-star"></i>
+
+                        @php
+                            $stars = $review->rating / 2;
+                        @endphp
+
+                        @for($i = 1; $i <= 5; $i++)
+                            @if($stars >= $i)
+                                <i class="fa fa-star"></i>
+                            @elseif($stars >= $i - 0.5)
+                                <i class="fa fa-star-half-alt"></i>
+                            @else
+                                <i class="fa-regular fa-star"></i>
+                            @endif
+                        @endfor
+
                     </div>
 
-                    <p>"Amazing products and fast delivery!"</p>
-                    <h6 class="fw-bold mb-0">Ali</h6>
-                    <small class="text-muted">Customer</small>
-                </div>
-            </div>
+                    <!-- COMMENT -->
+                    <p>"{{ $review->comment }}"</p>
 
-            <div class="col-md-4">
+                    <!-- NAME -->
+                    <h6 class="fw-bold mb-0">{{ $review->name }}</h6>
+
+                    <small class="text-muted">Customer</small>
+
+                </div>
+
+            </div>
+            @endforeach
+
+            <!-- <div class="col-md-4">
                 <div class="testimonial-card p-4">
                     <img src="{{ asset('images/image1.jpg') }}" class="testi-img mb-3">
 
@@ -243,7 +275,7 @@
                     <h6 class="fw-bold mb-0">Sara</h6>
                     <small class="text-muted">Customer</small>
                 </div>
-            </div>
+            </div> -->
 
         </div>
     </div>
